@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { priceDisplay } from '../util';
 import ajax from '../ajax';
 
-function DealDetail({ initialDealData }) {
+function DealDetail({ initialDealData, onBack }) {
 
   const [deal, setDeal] = useState(initialDealData);
 
@@ -20,71 +20,84 @@ function DealDetail({ initialDealData }) {
   
 
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: deal.media[0] }}
-        style={styles.image} 
-      />
-      <Text style={styles.title}>{deal.title}</Text>
-      {deal.user && (
-        <View style={styles.header}>
-          <View style={styles.subHeader}>
-            <Text>{priceDisplay(deal.price)}</Text>
-            <Text>{deal.cause.name}</Text>
+    <ScrollView style={styles.container}>
+      <TouchableOpacity onPress={onBack}>
+        <Text style={styles.backLink}>Back</Text>
+      </TouchableOpacity>
+      <View style={styles.dealContainer}>
+        <Image source={{ uri: deal.media[0] }}
+          style={styles.image} 
+        />
+        <Text style={styles.title}>{deal.title}</Text>
+        {deal.user && (
+          <View style={styles.header}>
+            <View style={styles.subHeader}>
+              <Text>{priceDisplay(deal.price)}</Text>
+              <Text>{deal.cause.name}</Text>
+            </View>
+            <View style={styles.subHeader}>
+              <Image source={{ uri: deal.user.avatar }} style={styles.avatar}/>
+              <Text>{deal.user.name}</Text>
+            </View>
           </View>
-          <View style={styles.subHeader}>
-            <Image source={{ uri: deal.user.avatar }} style={styles.avatar}/>
-            <Text>{deal.user.name}</Text>
-          </View>
+        )}
+        <View>
+          <Text style={styles.description}>{deal.description}</Text>
         </View>
-      )}
-      <View>
-        <Text style={styles.description}>{deal.description}</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    width: '100%',
-    height: 'fit-content',
-    marginHorizontal: 15,
-    marginTop: 15,
+  },
+  backLink: {
+    textAlign: 'center',
+    fontSize: 20,
+    marginVertical: 15,
+    color: '#22f'
+  },
+  dealContainer: {
     borderColor: '#bbb',
     borderWidth: 1,
+    width: 'auto',
+    marginTop: 0,
+    margin: 20,
   },
   title: {
     padding: 15,
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 5,
-    textAlign: 'justify',
+    textAlign: 'center',
     backgroundColor: '#eee'
   },
   image: {
     width: '100%',
-    height: 150,
+    height: 175,
     backgroundColor: '#ccc'
   },
   header: {
     padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   subHeader: {
-    justifyContent: 'center',
-    alignItems: 'center'
+    gap: 10,
+    alignItems: 'center',
+    
   },
   avatar: {
     width: 60,
     height: 60,
-    borderRadius: '50%'
+    borderRadius: 50
   },
   description: {
     textAlign: 'justify',
-    padding: 15
+    paddingHorizontal: 25,
+    paddingBottom: 25
   }
 });
 

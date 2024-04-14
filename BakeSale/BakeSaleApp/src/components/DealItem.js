@@ -27,10 +27,8 @@ function DealItem({ deal, onPress }) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 'auto',
     marginHorizontal: 15,
     marginTop: 15
-
   },
   info: {
     padding: 15,
