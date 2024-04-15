@@ -6,6 +6,7 @@ import ajax from '../ajax';
 function DealDetail({ initialDealData, onBack }) {
 
   const [deal, setDeal] = useState(initialDealData);
+  const [imageIndex, setImageIndex] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -25,7 +26,8 @@ function DealDetail({ initialDealData, onBack }) {
         <Text style={styles.backLink}>Back</Text>
       </TouchableOpacity>
       <View style={styles.dealContainer}>
-        <Image source={{ uri: deal.media[0] }}
+        <Image
+          source={{ uri: deal.media[imageIndex] }}
           style={styles.image} 
         />
         <Text style={styles.title}>{deal.title}</Text>
@@ -51,6 +53,7 @@ function DealDetail({ initialDealData, onBack }) {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 30
   },
   backLink: {
     textAlign: 'center',
