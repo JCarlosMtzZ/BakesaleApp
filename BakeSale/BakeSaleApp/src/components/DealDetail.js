@@ -1,23 +1,116 @@
-import { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  ScrollView,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  PanResponder,
+  Animated,
+  Dimensions,
+  Button,
+  Linking } from 'react-native';
 import { priceDisplay } from '../util';
 import ajax from '../ajax';
 
-function DealDetail({ initialDealData, onBack }) {
+function DealDetail({ deals, initialDealData, dealIndex, onBack }) {
+
+  const width = Dimensions.get('window').width;
+  const imageXPos = new Animated.Value(0);
+  const titleXPos = new Animated.Value(0);
 
   const [deal, setDeal] = useState(initialDealData);
+  const [currentDealIndex, setCurrentDealIndex] = useState(dealIndex);
   const [imageIndex, setImageIndex] = useState(0);
+  const indexDirectionRef = useRef(null);
+  
+  const handleSwipe = (indexDirection, animatedValue, type) => {
+    if (type === 'image') {
+      if (!deal.media[imageIndex + indexDirection]) {
+        Animated.spring(animatedValue, {
+          useNativeDriver: true,
+          toValue: 0
+        }).start();
+        return;
+      }
+      setImageIndex(prevImageIndex => prevImageIndex + indexDirection);
+      indexDirectionRef.current = indexDirection;
+    }
+    if (type === 'title') {
+      if (!deals[currentDealIndex + indexDirection]) {
+        Animated.spring(animatedValue, {
+          useNativeDriver: true,
+          toValue: 0
+        }).start();
+        return;
+      }
+      setCurrentDealIndex(prevDealIndex => prevDealIndex + indexDirection);
+      indexDirectionRef.current = indexDirection;
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await ajax.fetchDealDetail(initialDealData.key);
-      setDeal(data);
-    } 
-    
-    fetchData();
+    if (indexDirectionRef.current !== null) {
+      const indexDirection = indexDirectionRef.current;
+      imageXPos.setValue(indexDirection * width);
+      Animated.spring(imageXPos, {
+        useNativeDriver: true,
+        toValue: 0
+      }).start();
+    }
+  }, [imageIndex]);
 
+  useEffect(() => {
+    if (indexDirectionRef.current !== null) {
+      const indexDirection = indexDirectionRef.current;
+      titleXPos.setValue(indexDirection * width);
+      fetchData(deals[currentDealIndex].key);
+      Animated.spring(titleXPos, {
+        useNativeDriver: true,
+        toValue: 0
+      }).start(() => setImageIndex(0));
+    }
+  }, [currentDealIndex]);
+
+  const createPanResponder = (animatedValue, type) => {
+    const panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (evt, gs) => {
+        animatedValue.setValue(gs.dx);
+      },
+      onPanResponderRelease: (evt, gs) => {
+        if (Math.abs(gs.dx) > width * 0.2) {
+          const direction = Math.sign(gs.dx);
+          Animated.timing(animatedValue, {
+            toValue: direction * width,
+            duration: 250,
+            useNativeDriver: true,
+          }).start(() => handleSwipe(-1 * direction, animatedValue, type));
+        } else {
+          Animated.spring(animatedValue, {
+            useNativeDriver: true,
+            toValue: 0
+          }).start();
+        }
+      }
+    });
+    return panResponder;
+  }
+
+  
+  async function fetchData(key) {
+    const data = await ajax.fetchDealDetail(key);
+    setDeal(data);
+  } 
+
+  useEffect(() => {
+    fetchData(initialDealData.key);
   }, []);
 
+  const openDealUrl = () => {
+    Linking.openURL('https://www.youtube.com/');
+  };
   
 
   return (
@@ -26,11 +119,17 @@ function DealDetail({ initialDealData, onBack }) {
         <Text style={styles.backLink}>Back</Text>
       </TouchableOpacity>
       <View style={styles.dealContainer}>
-        <Image
+        <Animated.Image
+          {...createPanResponder(imageXPos, 'image').panHandlers}
           source={{ uri: deal.media[imageIndex] }}
-          style={styles.image} 
+          style={[{ transform: [{translateX: imageXPos}] }, styles.image]}
         />
-        <Text style={styles.title}>{deal.title}</Text>
+        <Animated.Text
+          {...createPanResponder(titleXPos, 'title').panHandlers}
+          style={[{ transform: [{translateX: titleXPos}] }, styles.title]}
+          >
+            {deal.title}
+        </Animated.Text>
         {deal.user && (
           <View style={styles.header}>
             <View style={styles.subHeader}>
@@ -46,7 +145,12 @@ function DealDetail({ initialDealData, onBack }) {
         <View>
           <Text style={styles.description}>{deal.description}</Text>
         </View>
+        <Button
+          title='Buy this deal'
+          onPress={openDealUrl}
+        />
       </View>
+      
     </ScrollView>
   );
 }

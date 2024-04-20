@@ -67,9 +67,15 @@ function App() {
     );
   };
 
+  const currentDealIndex = () => {
+    return deals.findIndex(deal => deal.key === currentDealId);
+  };
+
   if (currentDealId) return (
     <DealDetail
+      deals={deals}
       initialDealData={currentDeal()}
+      dealIndex={currentDealIndex()}
       onBack={unsetCurrentDeal} />);
 
   const dealsToDisplay = dealsFromSearch.length > 0 ? dealsFromSearch : deals;
