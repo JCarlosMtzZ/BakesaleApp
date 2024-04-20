@@ -66,12 +66,17 @@ function DealDetail({ deals, initialDealData, dealIndex, onBack }) {
       const indexDirection = indexDirectionRef.current;
       titleXPos.setValue(indexDirection * width);
       fetchData(deals[currentDealIndex].key);
-      Animated.spring(titleXPos, {
-        useNativeDriver: true,
-        toValue: 0
-      }).start(() => setImageIndex(0));
+      
     }
   }, [currentDealIndex]);
+
+  useEffect(() => {
+    //setImageIndex(0);
+    Animated.spring(titleXPos, {
+      useNativeDriver: true,
+      toValue: 0
+    }).start(() => setImageIndex(0));
+  }, [deal]);
 
   const createPanResponder = (animatedValue, type) => {
     const panResponder = PanResponder.create({
@@ -80,7 +85,7 @@ function DealDetail({ deals, initialDealData, dealIndex, onBack }) {
         animatedValue.setValue(gs.dx);
       },
       onPanResponderRelease: (evt, gs) => {
-        if (Math.abs(gs.dx) > width * 0.2) {
+        if (Math.abs(gs.dx) > width * 0.3) {
           const direction = Math.sign(gs.dx);
           Animated.timing(animatedValue, {
             toValue: direction * width,
@@ -114,7 +119,7 @@ function DealDetail({ deals, initialDealData, dealIndex, onBack }) {
   
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <TouchableOpacity onPress={onBack}>
         <Text style={styles.backLink}>Back</Text>
       </TouchableOpacity>
@@ -130,34 +135,35 @@ function DealDetail({ deals, initialDealData, dealIndex, onBack }) {
           >
             {deal.title}
         </Animated.Text>
-        {deal.user && (
-          <View style={styles.header}>
-            <View style={styles.subHeader}>
-              <Text>{priceDisplay(deal.price)}</Text>
-              <Text>{deal.cause.name}</Text>
+        <ScrollView>
+          {deal.user && (
+            <View style={styles.header}>
+              <View style={styles.subHeader}>
+                <Text>{priceDisplay(deal.price)}</Text>
+                <Text>{deal.cause.name}</Text>
+              </View>
+              <View style={styles.subHeader}>
+                <Image source={{ uri: deal.user.avatar }} style={styles.avatar}/>
+                <Text>{deal.user.name}</Text>
+              </View>
             </View>
-            <View style={styles.subHeader}>
-              <Image source={{ uri: deal.user.avatar }} style={styles.avatar}/>
-              <Text>{deal.user.name}</Text>
-            </View>
-          </View>
-        )}
-        <View>
+          )}
+        
           <Text style={styles.description}>{deal.description}</Text>
-        </View>
+        </ScrollView>
         <Button
           title='Buy this deal'
           onPress={openDealUrl}
         />
       </View>
-      
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 30
+    marginTop: 30,
+    flex: 1,
   },
   backLink: {
     textAlign: 'center',
@@ -166,11 +172,12 @@ const styles = StyleSheet.create({
     color: '#22f'
   },
   dealContainer: {
+    height: '90%',
     borderColor: '#bbb',
     borderWidth: 1,
     width: 'auto',
     marginTop: 0,
-    margin: 20,
+    
   },
   title: {
     padding: 15,

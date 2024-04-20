@@ -14,6 +14,7 @@ function App() {
   const [deals, setDeals] = useState([]);
   const [dealsFromSearch, setDealsFromSearch] = useState([]);
   const [currentDealId, setCurrentDealId] = useState(null);
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
 
 
   const animateLoadingTitle = (direction = 1) => {
@@ -47,10 +48,11 @@ function App() {
 
   const searchDeals = async (searchTerm) => {
     let dealsFromSearch = [];
-    if (searchTerm) {
-      dealsFromSearch = await ajax.fetchDealSearchResults(searchTerm);
-    }
+    //if (searchTerm) {
+    dealsFromSearch = await ajax.fetchDealSearchResults(searchTerm);
+    //}
     setDealsFromSearch(dealsFromSearch);
+    setActiveSearchTerm(searchTerm);
   };
 
   const setCurrentDeal = (dealId) => {
@@ -81,7 +83,7 @@ function App() {
   const dealsToDisplay = dealsFromSearch.length > 0 ? dealsFromSearch : deals;
   if (dealsToDisplay.length > 0) return (
     <View style={styles.container}>
-      <SearchBar searchDeals={searchDeals} />
+      <SearchBar searchDeals={searchDeals} initialSearchTerm={activeSearchTerm} />
       <DealList deals={dealsToDisplay} onItemPress={setCurrentDeal} />
     </View>);
 

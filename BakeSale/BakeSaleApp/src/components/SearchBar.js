@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import debounce from 'lodash.debounce';
 import { TextInput, StyleSheet } from "react-native";
 
-function SearchBar({ searchDeals }) {
+function SearchBar({ searchDeals, initialSearchTerm }) {
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
   const debouncedSearchDeals = debounce(searchDeals, 300);
 
@@ -18,6 +18,7 @@ function SearchBar({ searchDeals }) {
 
   return (
     <TextInput
+      value={searchTerm}
       placeholder="Search All Deals"
       style={styles.input}
       onChangeText={handleChange} />
